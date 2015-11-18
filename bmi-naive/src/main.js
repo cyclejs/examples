@@ -1,6 +1,6 @@
 import Cycle from '@cycle/core';
 import {Observable} from 'rx';
-import {h, makeDOMDriver} from '@cycle/dom';
+import {h, div, input, h2, makeDOMDriver} from '@cycle/dom';
 
 function main({DOM}) {
   let changeWeight$ = DOM.select('#weight').events('input')
@@ -20,16 +20,16 @@ function main({DOM}) {
 
   return {
     DOM: state$.map(({weight, height, bmi}) =>
-      h('div', [
-        h('div', [
+      div([
+        div([
           'Weight ' + weight + 'kg',
-          h('input#weight', {type: 'range', min: 40, max: 140, value: weight})
+          input('#weight', {type: 'range', min: 40, max: 140, value: weight})
         ]),
-        h('div', [
+        div([
           'Height ' + height + 'cm',
-          h('input#height', {type: 'range', min: 140, max: 210, value: height})
+          input('#height', {type: 'range', min: 140, max: 210, value: height})
         ]),
-        h('h2', 'BMI is ' + bmi)
+        h2('BMI is ' + bmi)
       ])
     )
   };
