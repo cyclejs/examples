@@ -1,0 +1,32 @@
+{
+  "name": "example",
+  "version": "0.0.0",
+  "private": true,
+  "author": "Andre Staltz",
+  "license": "MIT",
+  "contributors": [
+    "Vincent Orr (http://github.com/cmdv)",
+    "Tylor Steinberger (https://github.com/TylorS)"
+  ],
+  "dependencies": {
+    "@cycle/core": "6.0.0-rc2",
+    "@cycle/dom": "8.0.0-rc2",
+    "@cycle/history": "^1.1.0",
+    "@cycle/isolate": "1.0.x",
+    "rx": "^4.0.6",
+    "rx-combine-latest-obj": "^1.0.2",
+    "switch-path": "^1.1.3"
+  },
+  "devDependencies": {
+    "browserify": "11.0.1",
+    "babel": "5.6.x",
+    "babelify": "6.1.x",
+    "mkdirp": "0.5.x"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prebrowserify": "mkdirp dist",
+    "browserify": "browserify src/app.js -d -t babelify --outfile dist/app.js",
+    "start": "npm run browserify && echo 'OPEN index.html IN YOUR BROWSER'"
+  }
+}
