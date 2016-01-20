@@ -8,7 +8,7 @@ function main(sources) {
       .startWith(false)
       .map(toggled =>
         div([
-          input({type: 'checkbox'}), 'Toggle me',
+          input({type: 'checkbox', checked: toggled}), 'Toggle me',
           p(toggled ? 'ON' : 'off')
         ])
       )
