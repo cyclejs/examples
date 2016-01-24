@@ -1,7 +1,7 @@
 import {Observable, Subject} from 'rx';
 import {h3, div} from '@cycle/dom';
 import isolate from '@cycle/isolate';
-import Ticker from './Ticker.js';
+import Ticker from './ticker.js';
 
 function makeRandomColor() {
   let hexColor = Math.floor(Math.random() * 16777215).toString(16);
