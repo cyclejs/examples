@@ -1,4 +1,4 @@
-import Cycle from '@cycle/core';
+import {run} from '@cycle/core';
 import {Observable} from 'rx';
 import {h, makeDOMDriver} from '@cycle/dom';
 
@@ -35,6 +35,6 @@ function main({DOM}) {
   };
 }
 
-Cycle.run(main, {
+run(main, {
   DOM: makeDOMDriver('#main-container')
 });

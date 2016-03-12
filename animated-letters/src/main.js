@@ -1,7 +1,7 @@
-import Cycle from '@cycle/core'
+import {run} from '@cycle/core'
 import {Observable} from 'rx'
-import {div, ul, li, makeDOMDriver} from 'cycle-snabbdom'
-import {intersection, difference, sortBy} from 'lodash'
+import {ul, li, makeDOMDriver} from 'cycle-snabbdom'
+import {difference, sortBy} from 'lodash'
 
 function intent(keydownSource) {
   return keydownSource
@@ -89,7 +89,6 @@ function animate(state$) {
 function view(state$) {
   const animatedState$ = animate(state$)
   const ulStyle = {padding: '0', listStyle: 'none', display: 'flex'}
-  const liStyle = {fontSize: '50px'}
   return animatedState$.map(animStates =>
     ul({style: ulStyle}, animStates.map(animState =>
       li({style: {fontSize: `${animState.value * 50}px`}}, animState.key)
@@ -106,7 +105,7 @@ function main(sources) {
   }
 }
 
-Cycle.run(main, {
+run(main, {
   Keydown: () => Observable.fromEvent(document, 'keydown'),
   DOM: makeDOMDriver('#main-container')
 })

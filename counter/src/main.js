@@ -1,13 +1,13 @@
+import {run} from '@cycle/core';
 import {Observable} from 'rx';
-import Cycle from '@cycle/core';
 import {div, button, p, makeDOMDriver} from '@cycle/dom';
 
 function main({DOM}) {
   let action$ = Observable.merge(
-    DOM.select('.decrement').events('click').map(ev => -1),
-    DOM.select('.increment').events('click').map(ev => +1)
+    DOM.select('.decrement').events('click').map(() => -1),
+    DOM.select('.increment').events('click').map(() => +1)
   );
-  let count$ = action$.startWith(0).scan((x,y) => x+y);
+  let count$ = action$.startWith(0).scan((sum, x) => sum + x);
   return {
     DOM: count$.map(count =>
         div([
@@ -19,6 +19,6 @@ function main({DOM}) {
   };
 }
 
-Cycle.run(main, {
+run(main, {
   DOM: makeDOMDriver('#main-container')
 });

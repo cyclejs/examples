@@ -1,7 +1,7 @@
 import {Observable, Subject} from 'rx';
 import {h3, div} from '@cycle/dom';
 import isolate from '@cycle/isolate';
-import Ticker from './Ticker.js';
+import Ticker from './ticker';
 
 function makeRandomColor() {
   let hexColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -46,7 +46,7 @@ function model(actions, TickerComponent) {
     .shareReplay(1);
 }
 
-function view(children$, name = '') {
+function view(children$) {
   const loading = h3('Loading...');
   return children$.map(children =>
     div('#the-view', children.length > 0 ? children : [loading])

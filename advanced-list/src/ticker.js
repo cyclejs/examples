@@ -2,7 +2,7 @@ import {Observable} from 'rx';
 import {div, h1, h4, button} from '@cycle/dom';
 import combineLatestObj from 'rx-combine-latest-obj';
 
-function intent(DOM, name = '') {
+function intent(DOM) {
   const removeClicks$ = DOM.select('.remove-btn').events('click');
   const stop$ = removeClicks$;
   const remove$ = removeClicks$.delay(500);
