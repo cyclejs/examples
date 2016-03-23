@@ -61,16 +61,25 @@ function model(actions, sources, parentId) {
   return combineLatestObj({children$}).shareReplay(1)
 }
 
-const style = {
-  backgroundColor: '#00897B',
+const style = (color) => ({
+  backgroundColor: color,
   padding: '2em',
   width: 'auto',
   border: '2px solid black',
   transition: 'all 0.6s ease-in-out'
+})
+
+function makeRandomColor() {
+  let hexColor = Math.floor(Math.random() * 16777215).toString(16);
+  while (hexColor.length < 6) {
+    hexColor = '0' + hexColor;
+  }
+  hexColor = '#' + hexColor;
+  return hexColor;
 }
 
-const view = removable => ({children}) => {
-  return div({style}, [
+const view = (removable, color) => ({children}) => {
+  return div({style: style(color)}, [
     button('.add', ['Add Child']),
     removable && button('.remove', ['Remove me']),
     children && div({}, children.map(({id, DOM}) =>
@@ -83,7 +92,8 @@ function createButton({id, removable = true}) {
   return function Button(sources) {
     const actions = intent(sources, id)
     const state$ = model(actions, sources, id)
-    const view$ = state$.map(view(removable))
+    const color = makeRandomColor()
+    const view$ = state$.map(view(removable, color))
 
     const action$ = state$
       .flatMapLatest(
