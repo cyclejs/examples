@@ -9,11 +9,11 @@ const REMOVE = id => ({id, type: 'remove'})
 function intent({DOM, action$}, id) {
   const add$ = DOM.select('.add').events('click').map(() => ADD(id))
   const remove$ = DOM.select('.remove').events('click').map(() => REMOVE(id))
-  const removeButton$ = action$.filter(action => action.type === 'remove')
-  return {add$, remove$, removeButton$}
+  const removeFolder$ = action$.filter(action => action.type === 'remove')
+  return {add$, remove$, removeFolder$}
 }
 
-function findButton(children, _id) {
+function findFolder(children, _id) {
   const id = parseInt(_id)
   let pointerId;
   let index;
@@ -34,27 +34,27 @@ function findButton(children, _id) {
 }
 
 function model(actions, sources, parentId) {
-  const newButtonMod$ = actions.add$.map(() => children => {
+  const newFolderMod$ = actions.add$.map(() => children => {
     const lastId = children.length > 0 ?
       parseInt(children[children.length - 1].id) : 0
-    const Button = isolate(createButton({id: `${parentId}${lastId + 1}`}))
+    const Folder = isolate(createFolder({id: `${parentId}${lastId + 1}`}))
     const proxyAction$ = new Subject()
-    const button = Button({action$: proxyAction$, ...sources})
-    const {action$, remove$} = button
+    const folder = Folder({action$: proxyAction$, ...sources})
+    const {action$, remove$} = folder
     action$.takeUntil(remove$).subscribe(proxyAction$.asObserver())
-    return children.concat(button)
+    return children.concat(folder)
   })
 
-  const removeButtonMod$ = actions.removeButton$.map(({id}) => children => {
-    const buttonIndex = findButton(children, id)
-    if (buttonIndex !== null) {
-      children.splice(buttonIndex, 1)
+  const removeFolderMod$ = actions.removeFolder$.map(({id}) => children => {
+    const folderIndex = findFolder(children, id)
+    if (folderIndex !== null) {
+      children.splice(folderIndex, 1)
     }
     return children
   })
 
-  const children$ = newButtonMod$
-    .merge(removeButtonMod$)
+  const children$ = newFolderMod$
+    .merge(removeFolderMod$)
     .startWith([])
     .scan((children, modFn) => modFn(children))
 
@@ -80,7 +80,7 @@ function makeRandomColor() {
 
 const view = (removable, color) => ({children}) => {
   return div({style: style(color)}, [
-    button('.add', ['Add Child']),
+    button('.add', ['Add Folder']),
     removable && button('.remove', ['Remove me']),
     children && div({}, children.map(({id, DOM}) =>
       div({key: id}, [DOM])
@@ -88,8 +88,8 @@ const view = (removable, color) => ({children}) => {
   ])
 }
 
-function createButton({id, removable = true}) {
-  return function Button(sources) {
+function createFolder({id, removable = true}) {
+  return function Folder(sources) {
     const actions = intent(sources, id)
     const state$ = model(actions, sources, id)
     const color = makeRandomColor()
@@ -110,4 +110,4 @@ function createButton({id, removable = true}) {
   }
 }
 
-export {createButton}
+export {createFolder}

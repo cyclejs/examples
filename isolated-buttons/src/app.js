@@ -2,15 +2,15 @@ import {Subject} from 'rx'
 import {run} from '@cycle/core'
 import {makeDOMDriver} from 'cycle-snabbdom'
 
-import {createButton} from './Button'
+import {createFolder} from './Folder'
 
 function main(sources) {
-  const Button = createButton({id: '0', removable: false})
+  const Folder = createFolder({id: '0', removable: false})
   const proxyAction$ = new Subject()
-  const button = Button({action$: proxyAction$, ...sources})
-  const {action$, remove$} = button
+  const folder = Folder({action$: proxyAction$, ...sources})
+  const {action$, remove$} = folder
   action$.takeUntil(remove$).subscribe(proxyAction$.asObserver())
-  return button
+  return folder
 }
 
 run(main, {DOM: makeDOMDriver('#app')})
