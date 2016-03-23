@@ -37,7 +37,7 @@ function findFolder(children, _id) {
 function model(actions, sources, parentId) {
   const newFolderMod$ = actions.add$
     .map(() =>
-      function(children) {
+      function newFolderMod(children) {
         const lastId = children.length > 0 ?
           parseInt(children[children.length - 1].id) : 0
         const Folder = createFolderComponent({id: `${parentId}${lastId + 1}`})
@@ -48,7 +48,7 @@ function model(actions, sources, parentId) {
 
   const removeFolderMod$ = actions.removeFolder$
     .map(({id}) =>
-      function(children)  {
+      function removeFolderMod(children)  {
         const folderIndex = findFolder(children, id)
         if (folderIndex !== null) {
           children.splice(folderIndex, 1)
