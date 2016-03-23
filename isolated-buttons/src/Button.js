@@ -66,17 +66,7 @@ const style = {
   padding: '2em',
   width: 'auto',
   border: '2px solid black',
-  transition: 'all 0.6s ease-in-out',
-  opacity: 0,
-  delayed: {
-    opacity: 1,
-  },
-  remove: {
-    opacity: 0,
-  },
-  destroy: {
-    opacity: 0,
-  }
+  transition: 'all 0.6s ease-in-out'
 }
 
 const view = removable => ({children}) => {
