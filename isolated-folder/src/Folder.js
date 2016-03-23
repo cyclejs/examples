@@ -14,34 +14,53 @@ function intent({DOM}, action$, id) {
   return {add$, remove$, removeFolder$}
 }
 
+function findFolder(children, _id) {
+  const id = parseInt(_id)
+  let pointerId;
+  let index;
+  let top = children.length;
+  let bottom = 0;
+  for (let i = children.length - 1; i >= 0; i--) { // binary search
+    index = bottom + ((top - bottom) >> 1);
+    pointerId = parseInt(children[index].id);
+    if (pointerId === id) {
+      return index;
+    } else if (pointerId < id) {
+      bottom = index;
+    } else if (pointerId > id) {
+      top = index;
+    }
+  }
+  return null;
+}
+
 function model(actions, sources, parentId) {
   const newFolderMod$ = actions.add$
     .map(() =>
-      function newFolderMod(childrenMap) {
-        const lastId = childrenMap.size > 0 ?
-          parseInt(childrenMap[childrenMap.size - 1].id) : 0
-        const childId = `${parentId}${lastId + 1}`
-        const Folder = createFolderComponent({id: childId})
+      function newFolderMod(children) {
+        const lastId = children.length > 0 ?
+          parseInt(children[children.length - 1].id) : 0
+        const Folder = createFolderComponent({id: `${parentId}${lastId + 1}`})
         const folder = isolate(Folder)(sources)
-        return childrenMap.set(childId, folder)
+        return children.concat(folder)
       }
     )
 
   const removeFolderMod$ = actions.removeFolder$
     .map(({id}) =>
-      function removeFolderMod(childrenMap)  {
-        childrenMap.delete(id)
-        return childrenMap
+      function removeFolderMod(children)  {
+        const folderIndex = findFolder(children, id)
+        if (folderIndex !== null) {
+          children.splice(folderIndex, 1)
+        }
+        return children
       }
     )
 
   const children$ = newFolderMod$
     .merge(removeFolderMod$)
-    .startWith(new Map([]))
+    .startWith([])
     .scan((children, modFn) => modFn(children))
-    .map(childrenMap => [...childrenMap].map(
-      ([id, component]) => ({...component, id})
-    ))
 
   return children$.shareReplay(1)
 }
