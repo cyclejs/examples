@@ -21,7 +21,7 @@ function model(actions, sources, parentId) {
         const children = Array.from(childrenMap.values())
         const length = children.length
         const lastId = length > 0 ? children[length - 1].id : 0
-        const childId = Math.random(id + lastId)
+        const childId = Math.random()
         const Folder = createFolderComponent({id: childId})
         const folder = isolate(Folder)(sources)
         return childrenMap.set(childId, folder)
