@@ -14,52 +14,31 @@ function intent({DOM}, action$, id) {
   return {add$, remove$, removeFolder$}
 }
 
-function findFolder(children, _id) {
-  const id = parseInt(_id)
-  let pointerId;
-  let index;
-  let top = children.length;
-  let bottom = 0;
-  for (let i = children.length - 1; i >= 0; i--) { // binary search
-    index = bottom + ((top - bottom) >> 1);
-    pointerId = parseInt(children[index].id);
-    if (pointerId === id) {
-      return index;
-    } else if (pointerId < id) {
-      bottom = index;
-    } else if (pointerId > id) {
-      top = index;
-    }
-  }
-  return null;
-}
-
 function model(actions, sources, parentId) {
   const newFolderMod$ = actions.add$
     .map(() =>
-      function newFolderMod(children) {
-        const lastId = children.length > 0 ?
-          parseInt(children[children.length - 1].id) : 0
-        const Folder = createFolderComponent({id: `${parentId}${lastId + 1}`})
+      function newFolderMod(childrenMap) {
+        const children = Array.from(childrenMap.values())
+        const length = children.length
+        const lastId = length > 0 ? children[length - 1].id : 0
+        const id = lastId + 1
+        const Folder = createFolderComponent({id})
         const folder = isolate(Folder)(sources)
-        return children.concat(folder)
+        return childrenMap.set(id, folder)
       }
     )
 
   const removeFolderMod$ = actions.removeFolder$
     .map(({id}) =>
-      function removeFolderMod(children)  {
-        const folderIndex = findFolder(children, id)
-        if (folderIndex !== null) {
-          children.splice(folderIndex, 1)
-        }
-        return children
+      function removeFolderMod(childrenMap)  {
+        childrenMap.delete(id)
+        return childrenMap
       }
     )
 
   const children$ = newFolderMod$
     .merge(removeFolderMod$)
-    .startWith([])
+    .startWith(new Map([]))
     .scan((children, modFn) => modFn(children))
 
   return children$.shareReplay(1)
@@ -89,7 +68,7 @@ function makeView(removable, color) {
     return div({style: style(color)}, [
       button('.add', ['Add Folder']),
       removable && button('.remove', ['Remove me']),
-      children && div({}, children.map(({id, DOM}) =>
+      children && div({}, Array.from(children.values()).map(({id, DOM}) =>
         div({key: id}, [DOM])
       ))
     ])
@@ -105,7 +84,9 @@ function createFolderComponent({id, removable = true}) {
     const view$ = state$.map(makeView(removable, color))
 
     const action$ = state$
-      .flatMapLatest(children => Observable.merge(children.map(c => c.action$)))
+      .flatMapLatest(children => Observable.merge(
+          Array.from(children.values()).map(c => c.action$)
+        ))
       .merge(actions.remove$)
       .share()
 

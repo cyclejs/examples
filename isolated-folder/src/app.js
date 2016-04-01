@@ -5,7 +5,7 @@ import {makeDOMDriver} from 'cycle-snabbdom'
 import {createFolderComponent} from './Folder'
 
 function main(sources) {
-  const Folder = createFolderComponent({id: '0', removable: false})
+  const Folder = createFolderComponent({id: 0, removable: false})
   return Folder(sources)
 }
 
