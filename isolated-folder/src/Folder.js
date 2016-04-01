@@ -1,66 +1,62 @@
 import {Observable, Subject} from 'rx'
+const {merge} = Observable
 import isolate from '@cycle/isolate'
 import {div, button} from 'cycle-snabbdom'
-import combineLatestObj from 'rx-combine-latest-obj'
 
-const ADD = id => ({id, type: 'add'})
-const REMOVE = id => ({id, type: 'remove'})
+function intent(DOMSource, childAction$, selfId) {
+  return merge(
+    DOMSource.select('.add').events('click')
+      .map(() => ({selfId, type: 'addChild'})),
 
-function intent({DOM}, action$, id) {
-  const add$ = DOM.select('.add').events('click').map(() => ADD(id))
-  const remove$ = DOM.select('.remove').events('click').map(() => REMOVE(id))
-    .share()
-  const removeFolder$ = action$.filter(action => action.type === 'remove')
-  return {add$, remove$, removeFolder$}
+    DOMSource.select('.remove').events('click')
+      .map(() => ({selfId, type: 'removeSelf'}))
+      .share(),
+
+    childAction$
+      .filter(action => action.type === 'removeSelf')
+      .map(action => ({...action, type: 'removeChild'}))
+      .share()
+  )
 }
 
-function model(actions, sources, parentId) {
-  const newFolderMod$ = actions.add$
-    .map(({id}) =>
-      function newFolderMod(childrenMap) {
-        const children = Array.from(childrenMap.values())
-        const length = children.length
-        const lastId = length > 0 ? children[length - 1].id : 0
-        const childId = Math.random()
-        const Folder = createFolderComponent({id: childId})
-        const folder = isolate(Folder)(sources)
-        return childrenMap.set(childId, folder)
-      }
-    )
+function model(action$, createIsolatedFolder) {
+  const addFolderUpdate$ = action$
+    .filter(({type}) => type === 'addChild')
+    .map(action => function addFolderUpdate(childrenMap) {
+      const childId = String(Math.random()).replace('0.', '')
+      const folder = createIsolatedFolder(childId)
+      return childrenMap.set(childId, folder)
+    })
 
-  const removeFolderMod$ = actions.removeFolder$
-    .map(({id}) =>
-      function removeFolderMod(childrenMap)  {
-        childrenMap.delete(id)
-        return childrenMap
-      }
-    )
+  const removeFolderUpdate$ = action$
+    .filter(({type}) => type === 'removeChild')
+    .map(action => function removeFolderUpdate(childrenMap) {
+      childrenMap.delete(action.selfId)
+      return childrenMap
+    })
 
-  const children$ = newFolderMod$
-    .merge(removeFolderMod$)
-    .startWith(new Map([]))
-    .scan((children, modFn) => modFn(children))
+  const children$ = Observable.merge(addFolderUpdate$, removeFolderUpdate$)
+    .startWith(new Map())
+    .scan((children, update) => update(children))
 
   return children$.shareReplay(1)
 }
 
-function style(color) {
+function style(backgroundColor) {
   return {
-    backgroundColor: color,
+    backgroundColor,
     padding: '2em',
     width: 'auto',
     border: '2px solid black',
-    transition: 'all 0.6s ease-in-out',
   }
 }
 
 function makeRandomColor() {
-  let hexColor = Math.floor(Math.random() * 16777215).toString(16);
+  let hexColor = Math.floor(Math.random() * 16777215).toString(16)
   while (hexColor.length < 6) {
-    hexColor = '0' + hexColor;
+    hexColor = '0' + hexColor
   }
-  hexColor = '#' + hexColor;
-  return hexColor;
+  return '#' + hexColor
 }
 
 function makeView(removable, color) {
@@ -68,36 +64,41 @@ function makeView(removable, color) {
     return div({style: style(color)}, [
       button('.add', ['Add Folder']),
       removable && button('.remove', ['Remove me']),
-      children && div({}, Array.from(children.values()).map(({id, DOM}) =>
-        div({key: id}, [DOM])
+      children && div({}, Array.from(children.values()).map(child =>
+        div({key: child.id}, [child.DOM])
       ))
     ])
   }
 }
 
+
 function createFolderComponent({id, removable = true}) {
-  return function Folder(sources) {
-    const proxyAction$ = new Subject()
-    const actions = intent(sources, proxyAction$, id)
-    const state$ = model(actions, sources, id)
+  function Folder(sources) {
+    function createFolder(childId) {
+      return createFolderComponent(({id: childId}))(sources)
+    }
+
+    const proxyChildAction$ = new Subject()
+    const action$ = intent(sources.DOM, proxyChildAction$, id)
+    const children$ = model(action$, createFolder)
     const color = makeRandomColor()
-    const view$ = state$.map(makeView(removable, color))
+    const vdom$ = children$.map(makeView(removable, color))
+    const removeSelf$ = action$.filter(({type}) => type === 'removeSelf')
 
-    const action$ = state$
-      .flatMapLatest(children => Observable.merge(
-          Array.from(children.values()).map(c => c.action$)
-        ))
-      .merge(actions.remove$)
-      .share()
+    const childAction$ = children$
+      .map(children => merge(Array.from(children.values()).map(c => c.action$)))
+      .switch()
 
-    action$.takeUntil(actions.remove$).subscribe(proxyAction$.asObserver())
+    childAction$.takeUntil(removeSelf$).subscribe(proxyChildAction$)
 
     return {
-      DOM: view$,
+      DOM: vdom$,
       action$,
       id,
     }
   }
+
+  return isolate(Folder)
 }
 
 export {createFolderComponent}
