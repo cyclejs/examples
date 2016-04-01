@@ -16,15 +16,15 @@ function intent({DOM}, action$, id) {
 
 function model(actions, sources, parentId) {
   const newFolderMod$ = actions.add$
-    .map(() =>
+    .map(({id}) =>
       function newFolderMod(childrenMap) {
         const children = Array.from(childrenMap.values())
         const length = children.length
         const lastId = length > 0 ? children[length - 1].id : 0
-        const id = lastId + 1
-        const Folder = createFolderComponent({id})
+        const childId = Math.random(id + lastId)
+        const Folder = createFolderComponent({id: childId})
         const folder = isolate(Folder)(sources)
-        return childrenMap.set(id, folder)
+        return childrenMap.set(childId, folder)
       }
     )
 
