@@ -1,4 +1,4 @@
-let Cycle = require('@cycle/core');
+let {run} = require('@cycle/core');
 let express = require('express');
 let browserify = require('browserify');
 let serialize = require('serialize-javascript');
@@ -77,7 +77,7 @@ server.use(function (req, res) {
 
   let context$ = Observable.just({route: req.url});
   let wrappedAppFn = wrapAppResultWithBoilerplate(app, context$, clientBundle$);
-  let {sources} = Cycle.run(wrappedAppFn, {
+  let {sources} = run(wrappedAppFn, {
     DOM: makeHTMLDriver(),
     context: () => context$
   });

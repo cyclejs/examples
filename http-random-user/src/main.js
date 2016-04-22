@@ -1,4 +1,4 @@
-import Cycle from '@cycle/core';
+import {run} from '@cycle/core';
 import {div, button, h1, h4, a, makeDOMDriver} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
 
@@ -36,7 +36,7 @@ function main(sources) {
   };
 }
 
-Cycle.run(main, {
+run(main, {
   DOM: makeDOMDriver('#main-container'),
   HTTP: makeHTTPDriver()
 });

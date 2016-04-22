@@ -1,4 +1,4 @@
-let Cycle = require('@cycle/core');
+let {run} = require('@cycle/core');
 let {Observable} = require('rx');
 let {makeDOMDriver} = require('@cycle/dom');
 let app = require('./app');
@@ -9,7 +9,7 @@ function clientSideApp(responses) {
   return requests;
 }
 
-Cycle.run(clientSideApp, {
+run(clientSideApp, {
   DOM: makeDOMDriver('.app-container'),
   context: () => Observable.just(window.appContext)
 });

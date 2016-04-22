@@ -1,5 +1,5 @@
+import {run} from '@cycle/core'
 import {Observable} from 'rx'
-import Cycle from '@cycle/core'
 import {makeDOMDriver} from '@cycle/dom'
 import {makeJSONPDriver} from '@cycle/jsonp'
 import {restart, restartable} from 'cycle-restart'
@@ -21,7 +21,7 @@ const drivers = {
   preventDefault: restartable(preventDefaultSinkDriver),
 }
 
-const {sinks, sources} = Cycle.run(app, drivers)
+const {sinks, sources} = run(app, drivers)
 
 if (module && module.hot) {
   module.hot.accept('./app', () => {

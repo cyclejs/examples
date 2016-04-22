@@ -1,4 +1,3 @@
-import {Rx} from '@cycle/core';
 import {button, div, input} from '@cycle/dom';
 import combineLatestObj from 'rx-combine-latest-obj';
 
@@ -11,7 +10,7 @@ function intent(DOM) {
     .map(ev => ({width: parseInt(ev.target.value)}));
   const destroy$ = DOM.select('.remove-btn')
     .events('click')
-    .map(ev => true);
+    .map(() => true);
 
   return {changeColor$, changeWidth$, destroy$};
 }
