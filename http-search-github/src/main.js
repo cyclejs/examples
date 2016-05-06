@@ -1,3 +1,7 @@
+// This file is NOT what is referenced in the html file!!!
+// need to run "npm start" from the command line first, then a new JS file is compiled
+// unfortunately, after any changes to this file, must run "npm start" again before reloading page
+
 import Cycle from '@cycle/core';
 import {Observable} from 'rx';
 import {div, label, input, hr, ul, li, a, makeDOMDriver} from '@cycle/dom';
