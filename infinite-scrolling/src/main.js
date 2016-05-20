@@ -1,21 +1,38 @@
 import {Observable} from 'rx';
 import Cycle from '@cycle/core';
-import {div, button, p, makeDOMDriver} from '@cycle/dom';
+import {h1, div, h, makeDOMDriver} from '@cycle/dom';
+
+function intent(DOM) {
+  return {
+    scrollWindow$: DOM.select('.scroll-table').events('scroll').
+      map((e) => e.target.scrollTop)
+  };
+}
+
+function model(actions) {
+  return Observable.combineLatest(
+    actions.scrollWindow$.startWith(0)
+  );
+}
+
+function view(state$) {
+  return state$.
+    map((scrollTop) =>
+      div([
+        h1('scrollTop = ' + scrollTop),
+        div('.scroll-table', [
+          h1('.filler', 'FILLER')
+        ])
+      ])
+    );
+}
 
 function main({DOM}) {
-  let action$ = Observable.merge(
-    DOM.select('.decrement').events('click').map(ev => -1),
-    DOM.select('.increment').events('click').map(ev => +1)
-  );
-  let count$ = action$.startWith(0).scan((x,y) => x+y);
+  const actions = intent(DOM);
+  const state$ = model(actions);
+
   return {
-    DOM: count$.map(count =>
-        div([
-          button('.decrement', 'Decrement'),
-          button('.increment', 'Increment'),
-          p('Counter: ' + count)
-        ])
-      )
+    DOM: view(state$)
   };
 }
 
