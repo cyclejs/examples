@@ -2,6 +2,7 @@ import xs from 'xstream';
 import {h3, div} from '@cycle/dom';
 import isolate from '@cycle/isolate';
 import Ticker from './Ticker.js';
+import Collection from 'cycle-collections';
 
 function makeRandomColor() {
   let hexColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -12,32 +13,25 @@ function makeRandomColor() {
   return hexColor;
 }
 
-function intent(DOM, tickerAction$) {
-  const tickerRemove$ = tickerAction$.filter(a => a.type === 'remove');
-  const action$ = xs.merge(
-    tickerRemove$
-  );
-  return action$;
+function insertReducer(tickers) {
+  const color$ = xs.periodic(1000)
+    .map(makeRandomColor)
+    .startWith('#000000');
+
+  return tickers.add(color$);
 }
 
-function model(action$, TickerComponent) {
+function model(initialTickers) {
   const insertReducer$ = xs.periodic(5000).take(10)
-    .map(id => function insertReducer(oldList) {
-      const color$ = xs.periodic(1000)
-        .map(makeRandomColor)
-        .startWith('#000000');
-      const out = TickerComponent(color$, id);
-      return oldList.concat([{id, DOM: out.DOM, action$: out.action$}]);
-    });
+    .mapTo(insertReducer);
 
-  const removeReducer$ = action$
-    .filter(a => a.type === 'remove')
-    .map(action => function removeReducer(oldList) {
-      return oldList.filter(item => item.id !== action.id);
-    });
+  const action$ = xs.merge(
+    insertReducer$,
+    initialTickers.action$
+  );
 
-  const list$ = xs.merge(insertReducer$, removeReducer$)
-    .fold((oldList, reducer) => reducer(oldList), [])
+  const list$ = action$
+    .fold((oldList, reducer) => reducer(oldList), initialTickers)
     .remember();
 
   return list$;
@@ -50,30 +44,25 @@ function view(children$, name = '') {
   );
 }
 
-const TickerWrapper = sources => function TickerComponent(color$, id) {
-  const ticker = isolate(Ticker)({DOM: sources.DOM, color: color$});
-  return {
-    DOM: ticker.DOM,
-    action$: ticker.action$.map(a => {
-      a.id = id;
-      return a;
-    }),
-  };
-}
+const tickerChildActions = {
+  remove$ (tickers, ticker) {
+    return tickers.remove(ticker);
+  }
+};
 
 function App(sources) {
-  const tickerProxyAction$ = xs.create();
-  const action$ = intent(sources.DOM, tickerProxyAction$);
-  const tickers$ = model(action$, TickerWrapper(sources));
-  const tickerViews$ = tickers$.map(list => list.map(t => t.DOM));
-  const tickerAction$ = tickers$
-    .map(list => xs.merge(...list.map(t => t.action$)))
-    .flatten();
-  tickerProxyAction$.imitate(tickerAction$);
+  const tickers = Collection(Ticker, sources, tickerChildActions);
+
+  const tickers$ = model(tickers);
+
+  const tickerViews$ = Collection.pluck(tickers$, 'DOM');
+
   const vtree$ = view(tickerViews$);
+
   const sinks = {
     DOM: vtree$
   };
+
   return sinks;
 }
 
