@@ -21,17 +21,18 @@ function insertReducer(tickers) {
   return tickers.add(color$);
 }
 
-function model(initialTickers) {
+function model(tickers) {
   const insertReducer$ = xs.periodic(5000).take(10)
     .mapTo(insertReducer);
 
-  const action$ = xs.merge(
+  const reducer$ = xs.merge(
     insertReducer$,
-    initialTickers.action$
+
+    tickers.effect$
   );
 
-  const list$ = action$
-    .fold((oldList, reducer) => reducer(oldList), initialTickers)
+  const list$ = reducer$
+    .fold((oldList, reducer) => reducer(oldList), tickers)
     .remember();
 
   return list$;

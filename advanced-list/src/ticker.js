@@ -34,9 +34,9 @@ function view(state$) {
   });
 }
 
-function Ticker({DOM, props$}) {
-  const action$ = intent(DOM);
-  const state$ = model(action$, props$);
+function Ticker(sources) {
+  const action$ = intent(sources.DOM);
+  const state$ = model(action$, sources.props$);
   const vtree$ = view(state$);
   return {
     DOM: vtree$,
