@@ -45,14 +45,12 @@ function view(children$, name = '') {
   );
 }
 
-const tickerChildActions = {
-  remove$ (tickers, ticker) {
-    return tickers.remove(ticker);
-  }
-};
-
 function App(sources) {
-  const tickers = Collection(Ticker, sources, tickerChildActions);
+  const tickers = Collection(Ticker, sources, {
+    remove$ (tickers, ticker) {
+      return tickers.remove(ticker);
+    }
+  });
 
   const tickers$ = model(tickers);
 
