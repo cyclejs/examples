@@ -18,7 +18,7 @@ function insertReducer(tickers) {
     .map(makeRandomColor)
     .startWith('#000000');
 
-  return tickers.add(color$);
+  return tickers.add({color: color$});
 }
 
 function model(tickers) {

@@ -36,7 +36,7 @@ function view(state$) {
 
 function Ticker(sources) {
   const action$ = intent(sources.DOM);
-  const state$ = model(action$, sources.props$);
+  const state$ = model(action$, sources.color);
   const vtree$ = view(state$);
   return {
     DOM: vtree$,
