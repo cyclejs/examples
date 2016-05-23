@@ -28,14 +28,14 @@ function model(tickers) {
   const reducer$ = xs.merge(
     insertReducer$,
 
-    tickers.effect$
+    tickers.reducers
   );
 
-  const list$ = reducer$
-    .fold((oldList, reducer) => reducer(oldList), tickers)
+  const tickers$ = reducer$
+    .fold((oldTickers, reducer) => reducer(oldTickers), tickers)
     .remember();
 
-  return list$;
+  return tickers$;
 }
 
 function view(children$, name = '') {
