@@ -1,8 +1,7 @@
 import xs from 'xstream';
 import {h3, div} from '@cycle/dom';
-import isolate from '@cycle/isolate';
+import Collection from '@cycle/collection';
 import Ticker from './Ticker.js';
-import Collection from 'cycle-collections';
 
 function makeRandomColor() {
   let hexColor = Math.floor(Math.random() * 16777215).toString(16);

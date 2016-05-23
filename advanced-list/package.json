@@ -5,11 +5,12 @@
   "author": "Andre Staltz",
   "license": "MIT",
   "dependencies": {
-    "@cycle/xstream-run": "1.1.0",
+    "@cycle/collection": "^0.1.1",
     "@cycle/dom": "10.0.0-rc21",
     "@cycle/isolate": "1.1.x",
-    "xstream": "2.4.x",
-    "lodash": "^4.2.1"
+    "@cycle/xstream-run": "1.1.0",
+    "lodash": "^4.2.1",
+    "xstream": "2.4.x"
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.3.13",
