@@ -10,26 +10,41 @@ function intent(DOM) {
 }
 
 function model(actions) {
-  const listHeight$ = Observable.just("500px");
-  const itemHeight$ = Observable.just("200px");
+  const listHeight$ = Observable.just("500");
+  const itemHeight$ = Observable.just("200");
+  const items$ = Observable.just([{ id: 1 }, { id: 2 }, { id: 3 }]);
 
   return Observable.combineLatest(
     listHeight$,
-    itemHeight$
+    itemHeight$,
+    items$
   );
+}
+
+function renderItems(items, itemHeight) {
+  return items.map((item) => renderItem(item, itemHeight));
+}
+
+function renderItem(item, itemHeight) {
+  const vtree$ =
+    div(
+      '.item',
+      {
+        style: { height: itemHeight + 'px', background: 'red' }
+      },
+      h1("Item " + item.id)
+    );
+
+  return vtree$;
 }
 
 function view(state$) {
   return state$.
-    map(([listHeight, itemHeight]) =>
+    map(([listHeight, itemHeight, items]) =>
       div('.scroll-table', {
-          style: { height: listHeight, overflow: "auto" }
+          style: { height: listHeight + 'px', overflow: "auto" }
         },
-        div('.items', [
-          div('.item', { style: { height: itemHeight, background: 'red' } }, h1("Item 1")),
-          div('.item', { style: { height: itemHeight, background: 'red' } }, h1("Item 2")),
-          div('.item', { style: { height: itemHeight, background: 'red' } }, h1("Item 3"))
-        ])
+        div('.items', renderItems(items, itemHeight))
       )
     );
 }
