@@ -9,18 +9,23 @@ function intent(DOM) {
   };
 }
 
+function visibleItems(itemHeight$, scrollTop$) {
+  return Observable.just([{ id: 1 }, { id: 2 }, { id: 3 }]);
+}
+
 function model(actions) {
-  const listHeight$ = Observable.just(500);
   const itemHeight$ = Observable.just(200);
-  const totalItems$ = Observable.just(1000);
+  const totalItems$ = Observable.just(100);
+  const listHeight$ =
+    Observable.combineLatest(itemHeight$, totalItems$).
+      map(([itemHeight, totalItems]) => itemHeight * totalItems);
   const scrollTop$ = actions.scrollWindow$.startWith(0);
-  const items$ = Observable.just([{ id: 1 }, { id: 2 }, { id: 3 }]);
+  const items$ = visibleItems(itemHeight$, scrollTop$);
 
   return Observable.combineLatest(
     listHeight$,
     itemHeight$,
     totalItems$,
-    scrollTop$,
     items$
   );
 }
@@ -44,11 +49,15 @@ function renderItem(item, itemHeight) {
 
 function view(state$) {
   return state$.
-    map(([listHeight, itemHeight, totalItems, scrollTop, items]) =>
-      div('.scroll-table', {
-          style: { height: listHeight + 'px', overflow: "auto" }
+    map(([listHeight, itemHeight, totalItems, items]) =>
+      div('.scroll-wrapper', {
+          style: { height: '500px', overflow: "auto" }
         },
-        div('.items', renderItems(items, itemHeight))
+        div('.scroll-table', {
+            style: { height: listHeight + 'px' }
+          },
+          div('.items', renderItems(items, itemHeight))
+        )
       )
     );
 }
