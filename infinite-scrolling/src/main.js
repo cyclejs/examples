@@ -10,13 +10,17 @@ function intent(DOM) {
 }
 
 function model(actions) {
-  const listHeight$ = Observable.just("500");
-  const itemHeight$ = Observable.just("200");
+  const listHeight$ = Observable.just(500);
+  const itemHeight$ = Observable.just(200);
+  const totalItems$ = Observable.just(1000);
+  const scrollTop$ = actions.scrollWindow$.startWith(0);
   const items$ = Observable.just([{ id: 1 }, { id: 2 }, { id: 3 }]);
 
   return Observable.combineLatest(
     listHeight$,
     itemHeight$,
+    totalItems$,
+    scrollTop$,
     items$
   );
 }
@@ -40,7 +44,7 @@ function renderItem(item, itemHeight) {
 
 function view(state$) {
   return state$.
-    map(([listHeight, itemHeight, items]) =>
+    map(([listHeight, itemHeight, totalItems, scrollTop, items]) =>
       div('.scroll-table', {
           style: { height: listHeight + 'px', overflow: "auto" }
         },
