@@ -4,13 +4,16 @@ import {h1, div, h, makeDOMDriver} from '@cycle/dom';
 
 function intent(DOM) {
   return {
-    scrollWindow$: DOM.select('.scroll-table').events('scroll').
+    scrollWindow$: DOM.select('.scroll-wrapper').events('scroll').
       map((e) => e.target.scrollTop)
   };
 }
 
 function visibleItems(itemHeight$, scrollTop$) {
-  return Observable.just([{ id: 1 }, { id: 2 }, { id: 3 }]);
+  const first_item_id$ = itemHeight$.combineLatest(scrollTop$, (itemHeight, scrollTop) => Math.floor(scrollTop / itemHeight) + 1);
+  const visible_items$ = first_item_id$.map((id) => [{ id: id }, { id: id + 1 }, { id: id + 2 }, { id: id + 3 }]);
+
+  return visible_items$;
 }
 
 function model(actions) {
@@ -26,7 +29,8 @@ function model(actions) {
     listHeight$,
     itemHeight$,
     totalItems$,
-    items$
+    items$,
+    scrollTop$
   );
 }
 
@@ -39,7 +43,7 @@ function renderItem(item, itemHeight) {
     div(
       '.item',
       {
-        style: { height: itemHeight + 'px', background: 'red' }
+        style: { height: itemHeight + 'px', background: 'red', position: "absolute", top: itemHeight * ( item.id - 1 ) + "px" }
       },
       h1("Item " + item.id)
     );
@@ -49,15 +53,20 @@ function renderItem(item, itemHeight) {
 
 function view(state$) {
   return state$.
-    map(([listHeight, itemHeight, totalItems, items]) =>
-      div('.scroll-wrapper', {
-          style: { height: '500px', overflow: "auto" }
-        },
-        div('.scroll-table', {
-            style: { height: listHeight + 'px' }
-          },
-          div('.items', renderItems(items, itemHeight))
-        )
+    map(([listHeight, itemHeight, totalItems, items, scrollTop]) =>
+      div(
+        [
+          h1('scrollTop = ' + scrollTop),
+          div('.scroll-wrapper', {
+              style: { height: '500px', overflow: "auto" }
+            },
+            div('.scroll-table', {
+                style: { height: listHeight + 'px', position: "relative" }
+              },
+              div('.items', renderItems(items, itemHeight))
+            )
+          )
+        ]
       )
     );
 }
