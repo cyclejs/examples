@@ -18,7 +18,8 @@ function visibleItems(itemHeight$, wrapperHeight$, scrollTop$) {
     itemHeight$.combineLatest(
       scrollTop$,
       (itemHeight, scrollTop) => Math.floor(scrollTop / itemHeight) + 1
-    );
+    ).
+    distinctUntilChanged();
 
   const visible_item_ids$ =
     first_item_id$.combineLatest(
