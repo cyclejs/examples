@@ -9,6 +9,10 @@ function intent(DOM) {
   };
 }
 
+function retrieveItem(id) {
+  return Observable.just({id, status: "loaded" }).delay(500).startWith({id, status: "loading" });
+}
+
 function visibleItems(itemHeight$, wrapperHeight$, scrollTop$) {
   const first_item_id$ =
     itemHeight$.combineLatest(
@@ -28,7 +32,10 @@ function visibleItems(itemHeight$, wrapperHeight$, scrollTop$) {
       }
     );
 
-  const visible_items$ = visible_item_ids$.map((ids) => ids.map((id) => ( { id } )));
+  const visible_items$ =
+    visible_item_ids$.map((ids) => ids.map((id) => retrieveItem(id) )).
+      map((items$) => Observable.combineLatest(items$)).
+      flatMap((e) => e);
 
   return visible_items$;
 }
@@ -66,7 +73,7 @@ function renderItem(item, itemHeight, itemWidth) {
       {
         style: { height: itemHeight + 'px', width: itemWidth + 'px', background: 'red', position: "absolute", top: itemHeight * ( item.id - 1 ) + "px" }
       },
-      h1("Item " + item.id)
+      h1("Item " + item.id + ", status = " + item.status)
     );
 
   return vtree$;
