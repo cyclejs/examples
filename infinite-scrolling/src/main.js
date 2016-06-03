@@ -25,7 +25,7 @@ function visibleItems(itemHeight$, wrapperHeight$, scrollTop$) {
     first_item_id$.combineLatest(
       itemHeight$, wrapperHeight$,
       function(first_id, itemHeight, wrapperHeight) {
-        const num_of_visible_items = Math.ceil(wrapperHeight / itemHeight);
+        const num_of_visible_items = Math.ceil(wrapperHeight / itemHeight) + 1;
         const item_deltas = Array(num_of_visible_items).fill().map((_, i) => i);
         const item_ids = item_deltas.map((i) => i + first_id);
 
