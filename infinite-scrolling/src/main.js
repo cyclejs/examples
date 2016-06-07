@@ -13,11 +13,12 @@ function retrieveItem(id) {
   return Observable.just({id, status: "loaded" }).delay(500).startWith({id, status: "loading" });
 }
 
-function visibleItems(itemHeight$, wrapperHeight$, scrollTop$) {
+function visibleItems(itemHeight$, itemPadding$, wrapperHeight$, scrollTop$) {
   const first_item_id$ =
     itemHeight$.combineLatest(
-      scrollTop$,
-      (itemHeight, scrollTop) => Math.floor(scrollTop / itemHeight) + 1
+      itemPadding$, scrollTop$,
+      (itemHeight, itemPadding, scrollTop) =>
+          Math.floor(scrollTop / (itemHeight + itemPadding)) + 1
     ).
     distinctUntilChanged();
 
@@ -43,36 +44,39 @@ function visibleItems(itemHeight$, wrapperHeight$, scrollTop$) {
 
 function model(actions) {
   const itemHeight$ = Observable.just(200);
-  const itemWidth$ = Observable.just(200);
+  const itemPadding$ = Observable.just(20);
+  const itemWidth$ = Observable.just(300);
   const totalItems$ = Observable.just(100);
   const wrapperHeight$ = Observable.just(500);
   const listHeight$ =
-    Observable.combineLatest(itemHeight$, totalItems$).
-      map(([itemHeight, totalItems]) => itemHeight * totalItems);
+    Observable.combineLatest(itemHeight$, itemPadding$, totalItems$).
+      map(([itemHeight, itemPadding, totalItems]) =>
+        (itemHeight + itemPadding) * totalItems);
   const scrollTop$ = actions.scrollWindow$.startWith(0);
-  const items$ = visibleItems(itemHeight$, wrapperHeight$, scrollTop$);
+  const items$ = visibleItems(itemHeight$, itemPadding$, wrapperHeight$, scrollTop$);
 
   return Observable.combineLatest(
-    listHeight$,
-    itemHeight$,
-    itemWidth$,
-    wrapperHeight$,
-    totalItems$,
-    items$,
-    scrollTop$
+    listHeight$, itemHeight$, itemPadding$, itemWidth$, wrapperHeight$,
+    totalItems$, items$, scrollTop$
   );
 }
 
-function renderItems(items, itemHeight, itemWidth) {
-  return items.map((item) => renderItem(item, itemHeight, itemWidth));
+function renderItems(items, itemHeight, itemPadding, itemWidth) {
+  return items.map((item) => renderItem(item, itemHeight, itemPadding, itemWidth));
 }
 
-function renderItem(item, itemHeight, itemWidth) {
+function renderItem(item, itemHeight, itemPadding, itemWidth) {
   const vtree$ =
     div(
       '.item',
       {
-        style: { height: itemHeight + 'px', width: itemWidth + 'px', background: 'red', position: "absolute", top: itemHeight * ( item.id - 1 ) + "px" }
+        style: {
+          height: itemHeight + 'px',
+          width: itemWidth + 'px',
+          background: 'red',
+          position: "absolute",
+          top: ( (itemHeight + itemPadding) * ( item.id - 1 ) ) + "px"
+        },
       },
       h1("Item " + item.id + ", status = " + item.status)
     );
@@ -82,7 +86,7 @@ function renderItem(item, itemHeight, itemWidth) {
 
 function view(state$) {
   return state$.
-    map(([listHeight, itemHeight, itemWidth, wrapperHeight, totalItems, items, scrollTop]) =>
+    map(([listHeight, itemHeight, itemPadding, itemWidth, wrapperHeight,totalItems, items, scrollTop]) =>
       div(
         [
           h1('scrollTop = ' + scrollTop),
@@ -92,7 +96,7 @@ function view(state$) {
             div('.scroll-table', {
                 style: { height: listHeight + 'px', position: "relative" }
               },
-              div('.items', renderItems(items, itemHeight, itemWidth))
+              div('.items', renderItems(items, itemHeight, itemPadding, itemWidth))
             )
           )
         ]
