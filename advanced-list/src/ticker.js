@@ -40,7 +40,7 @@ function Ticker(sources) {
   const vtree$ = view(state$);
   return {
     DOM: vtree$,
-    action$: action$,
+    remove$: action$.filter(action => action.type === 'remove')
   };
 }
 
