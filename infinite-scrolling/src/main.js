@@ -13,7 +13,7 @@ function retrieveItem(id) {
   return Observable.just({id, status: "loaded" }).delay(500).startWith({id, status: "loading" });
 }
 
-function visibleItems(itemHeight$, itemPadding$, wrapperHeight$, scrollTop$) {
+function visibleItems(itemHeight$, itemPadding$, totalItems$, wrapperHeight$, scrollTop$) {
   const first_item_id$ =
     itemHeight$.combineLatest(
       itemPadding$, scrollTop$,
@@ -24,15 +24,16 @@ function visibleItems(itemHeight$, itemPadding$, wrapperHeight$, scrollTop$) {
 
   const visible_item_ids$ =
     first_item_id$.combineLatest(
-      itemHeight$, wrapperHeight$,
-      function(first_id, itemHeight, wrapperHeight) {
+      itemHeight$, totalItems$, wrapperHeight$,
+      function(first_id, itemHeight, totalItems, wrapperHeight) {
         const num_of_visible_items = Math.ceil(wrapperHeight / itemHeight) + 1;
         const item_deltas = Array(num_of_visible_items).fill().map((_, i) => i);
-        const item_ids = item_deltas.map((i) => i + first_id);
+        const item_ids = item_deltas.map((i) => i + first_id).
+          filter((id) => id <= totalItems);
 
         return item_ids;
       }
-    );
+    )
 
   const visible_items$ =
     visible_item_ids$.map((ids) => ids.map((id) => retrieveItem(id) )).
@@ -53,7 +54,7 @@ function model(actions) {
       map(([itemHeight, itemPadding, totalItems]) =>
         (itemHeight + itemPadding) * totalItems);
   const scrollTop$ = actions.scrollWindow$.startWith(0);
-  const items$ = visibleItems(itemHeight$, itemPadding$, wrapperHeight$, scrollTop$);
+  const items$ = visibleItems(itemHeight$, itemPadding$, totalItems$, wrapperHeight$, scrollTop$);
 
   return Observable.combineLatest(
     listHeight$, itemHeight$, itemPadding$, itemWidth$, wrapperHeight$,
