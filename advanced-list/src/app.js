@@ -12,29 +12,11 @@ function makeRandomColor() {
   return hexColor;
 }
 
-function insertReducer(tickers) {
-  const color$ = xs.periodic(1000)
+function makeColor$() {
+  return xs
+    .periodic(1000)
     .map(makeRandomColor)
     .startWith('#000000');
-
-  return tickers.add({color: color$});
-}
-
-function model(tickers) {
-  const insertReducer$ = xs.periodic(5000).take(10)
-    .mapTo(insertReducer);
-
-  const reducer$ = xs.merge(
-    insertReducer$,
-
-    tickers.reducers
-  );
-
-  const tickers$ = reducer$
-    .fold((oldTickers, reducer) => reducer(oldTickers), tickers)
-    .remember();
-
-  return tickers$;
 }
 
 function view(children$, name = '') {
@@ -45,13 +27,12 @@ function view(children$, name = '') {
 }
 
 function App(sources) {
-  const tickers = Collection(Ticker, sources, {
-    remove$ (tickers, ticker) {
-      return tickers.remove(ticker);
-    }
-  });
+  const addTicker$ = xs
+    .periodic(5000)
+    .take(10)
+    .map(() => ({color: makeColor$()}));
 
-  const tickers$ = model(tickers);
+  const tickers$ = Collection(Ticker, sources, addTicker$);
 
   const tickerViews$ = Collection.pluck(tickers$, 'DOM');
 
