@@ -4,8 +4,8 @@ import {makeDOMDriver} from '@cycle/dom'
 import {createFolderComponent} from './Folder'
 
 function main(sources) {
-  const Folder = createFolderComponent({id: 0, removable: false})
+  const Folder = createFolderComponent({removable: false})
   return Folder(sources)
 }
 
-run(main, {DOM: makeDOMDriver('#app', {transposition: true})})
+run(main, {DOM: makeDOMDriver('#app')})
