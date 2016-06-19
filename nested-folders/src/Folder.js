@@ -37,15 +37,13 @@ function makeRandomColor() {
   return '#' + hexColor
 }
 
-function createFolderComponent({removable = true}) {
-  function Folder(sources) {
-    const actions = intent(sources.DOM)
+function createFolderComponent({removable}) {
+  const ChildFolder = createFolderComponent({removable: true})
 
-    const children$ = Collection(
-      createFolderComponent({}),
-      sources,
-      actions.addChild$
-    )
+  function Folder(sources) {
+    const {addChild$, remove$} = intent(sources.DOM)
+
+    const children$ = Collection(ChildFolder, sources, addChild$)
 
     const color = makeRandomColor()
 
@@ -54,7 +52,7 @@ function createFolderComponent({removable = true}) {
 
     return {
       DOM: vdom$,
-      remove$: actions.remove$
+      remove$
     }
   }
 
