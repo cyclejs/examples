@@ -43,11 +43,11 @@ function createFolderComponent({removable}) {
 
     const ChildFolder = createFolderComponent({removable: true})
 
-    const children$ = Collection(ChildFolder, sources, addChild$)
+    const children$ = Collection(ChildFolder, sources, addChild$, child => child.remove$)
 
     const color = makeRandomColor()
 
-    const vdom$ = Collection.pluck(children$, 'DOM')
+    const vdom$ = Collection.pluck(children$, child => child.DOM)
       .map(makeView(removable, color))
 
     return {

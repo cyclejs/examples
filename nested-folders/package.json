@@ -6,10 +6,10 @@
   "author": "Tylor Steinberger <tlsteinberger167@gmail.com> (github.com/Tylors)",
   "license": "MIT",
   "dependencies": {
+    "@cycle/collection": "^0.3.0",
+    "@cycle/dom": "10.0.0-rc33",
     "@cycle/isolate": "1.4.x",
     "@cycle/xstream-run": "3.0.0",
-    "@cycle/dom": "10.0.0-rc33",
-    "@cycle/collection": "^0.2.0",
     "xstream": "5.0.x"
   },
   "devDependencies": {
