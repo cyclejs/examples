@@ -34,7 +34,7 @@ function intent(DOM) {
 }
 
 function view(items$) {
-  return Collection.pluck(items$, 'DOM')
+  return Collection.pluck(items$, item => item.DOM)
     .map(items =>
       div('.list', [
         div('.addButtons', [
@@ -51,7 +51,7 @@ function List(sources) {
   const addItem$ = intent(sources.DOM)
     .startWith({Props: xs.of({color: 'red', width: 300})});
 
-  const items$ = Collection(Item, sources, addItem$, 'Remove');
+  const items$ = Collection(Item, sources, addItem$, item => item.Remove);
 
   const vtree$ = view(items$);
 

@@ -10,7 +10,7 @@
     }
   ],
   "dependencies": {
-    "@cycle/collection": "^0.2.0",
+    "@cycle/collection": "^0.3.0",
     "@cycle/dom": "10.0.0-rc33",
     "@cycle/isolate": "1.4.x",
     "@cycle/xstream-run": "3.0.x",
