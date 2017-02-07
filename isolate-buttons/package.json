@@ -1,0 +1,32 @@
+{
+  "name": "cycle-isolate-button",
+  "version": "0.0.0",
+  "author": "Vincent Orr",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@cycle/core": "6.0.0",
+    "@cycle/dom": "8.1.0",
+    "@cycle/isolate": "1.2.x",
+    "@cycle/storage": "^2.0.3",
+    "rx": "4.0.7"
+  },
+  "devDependencies": {
+    "babel": "5.8.29",
+    "babelify": "6.2.0",
+    "browserify": "12.0.1",
+    "live-server": "^0.9.0",
+    "mkdirp": "^0.5.1",
+    "npm-run-all": "^1.4.0",
+    "uglify-js": "2.6.1",
+    "watchify": "^3.6.1"
+  },
+  "scripts": {
+    "build-debug": "mkdirp dist && browserify src/app.js -t babelify --outfile dist/app.js",
+    "watch:dist": "mkdirp dist && watchify src/app.js -t babelify --outfile dist/app.js -dv",
+    "serve": "live-server ./",
+    "uglify": "uglifyjs dist/app.js -o dist/app.min.js",
+    "build": "npm run build-debug && npm run uglify",
+    "start": "npm-run-all --parallel watch:dist serve"
+  }
+}
